@@ -1,0 +1,278 @@
+DROP VIEW IF EXISTS vw_lancamentos;
+DROP VIEW IF EXISTS vw_filmes_populares;
+DROP VIEW IF EXISTS vw_reviews_recentes;
+
+DROP TABLE IF EXISTS tca_review;
+DROP TABLE IF EXISTS tca_watchlist;
+DROP TABLE IF EXISTS tca_favoritos;
+DROP TABLE IF EXISTS tca_filme;
+DROP TABLE IF EXISTS tca_categoria;
+DROP TABLE IF EXISTS tca_usuario;
+
+CREATE TABLE tca_usuario (
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nome_usuario VARCHAR(45) NOT NULL UNIQUE,
+    email VARCHAR(45) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    foto_perfil VARCHAR(300) DEFAULT 'default_avatar.png',
+    biografia TEXT,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE tca_categoria (
+    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+    nome_categoria VARCHAR(45) NOT NULL UNIQUE,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE tca_filme (
+    id_filme INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(100) NOT NULL,
+    ano_publicacao INT,
+    diretor VARCHAR(100),
+    sinopse MEDIUMTEXT,
+    elenco MEDIUMTEXT,
+    capa VARCHAR(300) DEFAULT 'default_poster.jpg',
+    categoria_fk INT NOT NULL,
+    notaMedia DECIMAL(3,1) DEFAULT 0.0,
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (categoria_fk) REFERENCES tca_categoria(id_categoria)
+);
+
+CREATE TABLE tca_favoritos (
+    usuario_fk INT NOT NULL,
+    filme_fk INT NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (usuario_fk, filme_fk),
+    FOREIGN KEY (usuario_fk) REFERENCES tca_usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (filme_fk) REFERENCES tca_filme(id_filme) ON DELETE CASCADE
+);
+
+CREATE TABLE tca_watchlist (
+    usuario_fk INT NOT NULL,
+    filme_fk INT NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (usuario_fk, filme_fk),
+    FOREIGN KEY (usuario_fk) REFERENCES tca_usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (filme_fk) REFERENCES tca_filme(id_filme) ON DELETE CASCADE
+);
+
+CREATE TABLE tca_review (
+    id_review INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_fk INT NOT NULL,
+    filme_fk INT NOT NULL,
+    comentario TEXT NOT NULL,
+    nota DECIMAL(3,1) CHECK (nota >= 0 AND nota <= 5),
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (usuario_fk) REFERENCES tca_usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (filme_fk) REFERENCES tca_filme(id_filme) ON DELETE CASCADE,
+    UNIQUE KEY unique_review (usuario_fk, filme_fk)
+);
+
+INSERT INTO tca_categoria (nome_categoria) VALUES
+('Ação'), ('Aventura'), ('Animação'), ('Comédia'), ('Documentário'), ('Drama'), ('Fantasia'), ('Ficção Científica'), ('Romance'), ('Suspense'), ('Terror');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Karate Kid', 1984, 'John G. Avildsen', 'Um adolescente se muda para a Califórnia e aprende artes marciais com um mestre para se defender de valentões da escola.', 'Ralph Macchio, Pat Morita, Elisabeth Shue', 1, 'karate_kid.jpg');
+
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Avatar', 2009, 'James Cameron', 'Um fuzileiro naval paraplégico é enviado à lua Pandora, onde se envolve com os nativos Na''vi em uma batalha pela sobrevivência.', 'Sam Worthington, Zoe Saldana, Sigourney Weaver', 2, 'avatar.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Toy Story', 1995, 'John Lasseter', 'Os brinquedos de um garoto ganham vida quando humanos não estão presentes, levando a aventuras sobre amizade e ciúmes.', 'Tom Hanks, Tim Allen, Don Rickles', 3, 'toy_story.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('As Branquelas', 2004, 'Keenen Ivory Wayans', 'Dois agentes do FBI se disfarçam de socialites para proteger herdeiras de um sequestro, criando situações hilárias.', 'Shawn Wayans, Marlon Wayans, Busy Philipps', 4, 'as_branquelas.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Chorão: Marginal Alado', 2023, 'Felipe Novaes', 'Documentário sobre a vida e obra de Chorão, vocalista do Charlie Brown Jr., mostrando sua genialidade, conflitos e legado no rock brasileiro.', 'Chorão, Champignon, Renato Pelado', 5, 'chorao.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Tropa de Elite', 2007, 'José Padilha', 'A rotina do BOPE, tropa de elite da polícia militar do Rio de Janeiro, e a guerra contra o tráfico de drogas nas favelas.', 'Wagner Moura, Caio Junqueira, André Ramiro', 6, 'tropa_de_elite.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('A Fantástica Fábrica de Chocolates', 2005, 'Tim Burton', 'Um garoto pobre ganha um tour pela fábrica de chocolate mais misteriosa do mundo, liderada pelo excêntrico Willy Wonka.', 'Johnny Depp, Freddie Highmore, David Kelly', 7, 'fantastica_fabrica_chocolate.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Interestelar', 2014, 'Christopher Nolan', 'Um grupo de exploradores viaja através de um buraco de minhoca no espaço para garantir a sobrevivência da humanidade.', 'Matthew McConaughey, Anne Hathaway, Jessica Chastain', 8, 'interestelar.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Diário de uma Paixão', 2004, 'Nick Cassavetes', 'Um idoso lê para uma paciente com Alzheimer a história de amor de sua vida, que atravessou décadas e desafios.', 'Ryan Gosling, Rachel McAdams, James Garner', 9, 'diario_paixao.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Garota Exemplar', 2014, 'David Fincher', 'No dia de seu aniversário de casamento, a aparentemente perfeita Amy desaparece. Todas as pistas levam ao marido.', 'Ben Affleck, Rosamund Pike, Neil Patrick Harris', 10, 'garota_exemplar.jpg');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Invocação do Mal', 2013, 'James Wan', 'Investigadores paranormais ajudam uma família aterrorizada por uma presença sombria em sua casa rural.', 'Vera Farmiga, Patrick Wilson, Ron Livingston', 11,'invocacao_do_mal.jpg');
+
+CREATE VIEW vw_lancamentos AS
+SELECT 
+    f.id_filme,
+    f.titulo,
+    f.ano_publicacao,
+    f.diretor,
+    f.sinopse,
+    f.capa,
+    f.duracao,
+    c.nome_categoria,
+    COUNT(fav.usuario_fk) as total_favoritos,
+    COUNT(w.usuario_fk) as total_watchlist,
+    COUNT(r.id_review) as total_reviews,
+    COALESCE(AVG(r.nota), 0) as nota_media
+FROM tca_filme f
+INNER JOIN tca_categoria c ON f.categoria_fk = c.id_categoria
+LEFT JOIN tca_favoritos fav ON f.id_filme = fav.filme_fk AND fav.ativo = TRUE
+LEFT JOIN tca_watchlist w ON f.id_filme = w.filme_fk AND w.ativo = TRUE
+LEFT JOIN tca_review r ON f.id_filme = r.filme_fk AND r.ativo = TRUE
+WHERE f.ativo = TRUE
+GROUP BY f.id_filme, f.titulo, f.ano_publicacao, f.diretor, f.sinopse, f.capa, f.duracao, c.nome_categoria
+ORDER BY f.id_filme DESC
+LIMIT 10;
+
+CREATE VIEW vw_filmes_populares AS
+SELECT 
+    f.id_filme,
+    f.titulo,
+    f.ano_publicacao,
+    f.diretor,
+    f.sinopse,
+    f.capa,
+    c.nome_categoria,
+    COUNT(fav.usuario_fk) as total_favoritos,
+    COUNT(w.usuario_fk) as total_watchlist,
+    COUNT(r.id_review) as total_reviews,
+    COALESCE(AVG(r.nota), 0) as nota_media
+FROM tca_filme f
+INNER JOIN tca_categoria c ON f.categoria_fk = c.id_categoria
+LEFT JOIN tca_favoritos fav ON f.id_filme = fav.filme_fk AND fav.ativo = TRUE
+LEFT JOIN tca_watchlist w ON f.id_filme = w.filme_fk AND w.ativo = TRUE
+LEFT JOIN tca_review r ON f.id_filme = r.filme_fk AND r.ativo = TRUE
+WHERE f.ativo = TRUE
+GROUP BY f.id_filme, f.titulo, f.ano_publicacao, f.diretor, f.sinopse, f.capa, f.duracao, c.nome_categoria
+ORDER BY total_favoritos DESC
+LIMIT 10;
+
+CREATE VIEW vw_reviews_recentes AS
+SELECT 
+    r.id_review,
+    r.comentario,
+    r.nota,
+    u.nome_usuario,
+    u.foto_perfil,
+    f.titulo as filme_titulo,
+    f.capa as filme_capa,
+    c.nome_categoria as categoria_filme,
+    f.id_filme
+FROM tca_review r
+INNER JOIN tca_usuario u ON r.usuario_fk = u.id_usuario
+INNER JOIN tca_filme f ON r.filme_fk = f.id_filme
+INNER JOIN tca_categoria c ON f.categoria_fk = c.id_categoria
+WHERE r.ativo = TRUE AND u.ativo = TRUE AND f.ativo = TRUE
+ORDER BY r.id_review DESC
+LIMIT 5;
+
+DELIMITER //
+CREATE PROCEDURE sp_buscar_filmes_por_categoria(IN categoria_nome VARCHAR(45))
+BEGIN
+    SELECT f.titulo, f.ano_publicacao, f.diretor, f.sinopse, c.nome_categoria
+    FROM tca_filme f
+    INNER JOIN tca_categoria c ON f.categoria_fk = c.id_categoria
+    WHERE c.nome_categoria = categoria_nome AND f.ativo = TRUE
+    ORDER BY f.titulo;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_adicionar_favorito(IN usuario_id INT, IN filme_id INT)
+BEGIN
+    INSERT INTO tca_favoritos (usuario_fk, filme_fk, data_adicao)
+    VALUES (usuario_id, filme_id, NOW())
+    ON DUPLICATE KEY UPDATE ativo = TRUE, data_adicao = NOW();
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_adicionar_watchlist(IN usuario_id INT, IN filme_id INT)
+BEGIN
+    INSERT INTO tca_watchlist (usuario_fk, filme_fk, data_adicao)
+    VALUES (usuario_id, filme_id, NOW())
+    ON DUPLICATE KEY UPDATE ativo = TRUE, data_adicao = NOW();
+END //
+DELIMITER;
+
+ALTER TABLE tca_filme
+ALTER COLUMN capa_filme SET DEFAULT 'default.png';
+
+UPDATE tca_filme
+SET capa_filme = REPLACE(capa_filme, '.jpg', '.png')
+WHERE capa_filme LIKE '%.jpg';
+
+ALTER TABLE tca_filme
+CHANGE notaMedia nota_media DECIMAL(3,1);
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Homem-Aranha', 2002, 'Sam Raimi', 'Um adolescente ganha superpoderes após ser picado por uma aranha geneticamente modificada e precisa aprender a ser um herói.', 'Tobey Maguire, Kirsten Dunst, Willem Dafoe', 1, 'homem_aranha.png'),
+('Kill Bill', 2003, 'Quentin Tarantino', 'Uma assassina acorda de um coma e busca vingança contra sua antiga equipe que tentou matá-la e roubou sua filha.', 'Uma Thurman, David Carradine, Lucy Liu', 1, 'kill_bill.png'),
+('John Wick', 2014, 'Chad Stahelski', 'Um ex-assassino volta à ativa quando bandidos invadem sua casa, roubam seu carro e matam seu cachorro.', 'Keanu Reeves, Michael Nyqvist, Alfie Allen', 1, 'john_wick.png'),
+('Mad Max: Estrada da Fúria', 2015, 'George Miller', 'Em um mundo pós-apocalíptico, Max se junta a um grupo de rebeldes fugindo através do deserto em um caminhão de guerra.', 'Tom Hardy, Charlize Theron, Nicholas Hoult', 1, 'mad_max.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Indiana Jones e os Caçadores da Arca Perdida', 1981, 'Steven Spielberg', 'Um arqueólogo aventuroso corre contra nazistas para encontrar a Arca da Aliança antes que eles usem seu poder para dominar o mundo.', 'Harrison Ford, Karen Allen, Paul Freeman', 2, 'indiana_jones.png'),
+('Jurassic Park', 1993, 'Steven Spielberg', 'Um parque temático com dinossauros clonados sai do controle quando os predadores pré-históricos escapam de seus recintos.', 'Sam Neill, Laura Dern, Jeff Goldblum', 2, 'jurassic_park.png'),
+('Piratas do Caribe: A Maldição do Pérola Negra', 2003, 'Gore Verbinski', 'Um pirata excêntrico une forças com um jovem ferreiro para resgatar uma mulher sequestrada e derrotar piratas amaldiçoados.', 'Johnny Depp, Orlando Bloom, Keira Knightley', 2, 'piratas_do_caribe.png'),
+('Jumanji: Bem-Vindo à Selva', 2017, 'Jake Kasdan', 'Quatro adolescentes são transportados para o mundo do videogame Jumanji, onde assumem avatares de personagens do jogo.', 'Dwayne Johnson, Kevin Hart, Jack Black', 2, 'jumanji.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Procurando Nemo', 2003, 'Andrew Stanton', 'Um peixe-palhaço sobreprotetor embarca em uma jornada épica pelo oceano para resgatar seu filho, que foi capturado por um dentista.', 'Albert Brooks, Ellen DeGeneres, Alexander Gould', 3, 'procurando_nemo.png'),
+('Shrek', 2001, 'Andrew Adamson', 'Um ogro solitário embarca em uma missão para resgatar uma princesa, mas acaba se apaixonando por ela durante a jornada.', 'Mike Myers, Eddie Murphy, Cameron Diaz', 3, 'shrek.png'),
+('Frozen', 2013, 'Chris Buck, Jennifer Lee', 'Uma princesa otimista embarca em uma jornada para encontrar sua irmã, cujos poderes gelados acidentalmente congelaram o reino.', 'Kristen Bell, Idina Menzel, Jonathan Groff', 3, 'frozen.png'),
+('Homem-Aranha no Aranhaverso', 2018, 'Bob Persichetti, Peter Ramsey', 'Um adolescente se torna o Homem-Aranha e descobre o multiverso, conhecendo versões alternativas do herói.', 'Shameik Moore, Jake Johnson, Hailee Steinfeld', 3, 'homem_aranha_aranhaverso.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Se Beber, Não Case', 2009, 'Todd Phillips', 'Três amigos perdem o noivo durante sua despedida de solteiro em Las Vegas e precisam encontrá-lo antes do casamento.', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 4, 'se_beber_nao_case.png'),
+('Escola de Rock', 2003, 'Richard Linklater', 'Um músico fracassado se disfarça de professor substituto e transforma uma turma de alunos em uma banda de rock.', 'Jack Black, Joan Cusack, Mike White', 4, 'escola_de_rock.png'),
+('Debi & Lóide', 1994, 'Peter Farrelly', 'Dois amigos embarcam em uma viagem cross-country para devolver uma mala, sem saber que estão sendo perseguidos por assassinos.', 'Jim Carrey, Jeff Daniels, Lauren Holly', 4, 'debi_loide.png'),
+('As Patricinhas de Beverly Hills', 1995, 'Amy Heckerling', 'Uma adolescente rica e popular de Beverly Hills domina o universo da moda enquanto tenta encontrar o verdadeiro amor.', 'Alicia Silverstone, Stacey Dash, Brittany Murphy', 4, 'as_patricinhas.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk) VALUES
+('Racionais: Das Ruas de São Paulo Pro Mundo', 2021, 'Juliana Borges', 'A trajetória do maior grupo de rap do Brasil, dos bailes da quebrada à consagração internacional.', 'Mano Brown, Ice Blue, Edi Rock, KL Jay', 5, 'racionais.png'),
+('Cazuza: O Tempo Não Pára', 2004, 'Sandra Werneck e Walter Carvalho', 'A vida intensa e breve de Cazuza, do sucesso com o Barão Vermelho à carreira solo, sua luta contra a AIDS e seu legado na música brasileira.', 'Cazuza, Lucinha Araújo, Frejat', 5, 'cazuza.png'),
+('Tim Maia: Vale Tudo - O Som e a Fúria', 2014, 'João Fonseca', 'A vida turbulenta e genial de Tim Maia, dos anos na Jovem Guarda à descoberta do soul, suas crises e sua voz inconfundível.', 'Tim Maia, Roberto Carlos, Erasmo Carlos', 5, 'tim_maia.png'),
+('Elis Regina: Como Nossos Pais', 2023, 'Roberto Oliveira', 'A trajetória da maior voz do Brasil, sua paixão pela música, personalidade forte e contribuição eterna para a MPB.', 'Elis Regina, César Camargo Mariano, Rita Lee', 5, 'elis_regina.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Caramelo', 2023, 'Fabricio Bittar', 'Uma história emocionante sobre amadurecimento e descobertas na adolescência, explorando relações familiares e primeiros amores.', 'Elenco Brasileiro', 6, 'caramelo.png'),
+('Parasita', 2019, 'Bong Joon-ho', 'Uma família pobre infiltra-se na casa de uma família rica, criando uma relação simbiótica que revela as profundas desigualdades sociais.', 'Song Kang-ho, Lee Sun-kyun, Cho Yeo-jeong', 6, 'parasita.png'),
+('Cidade de Deus', 2002, 'Fernando Meirelles', 'Na favela carioca dos anos 70 e 80, um jovem fotógrafo documenta a ascensão do tráfico de drogas e a violência que consome sua comunidade.', 'Alexandre Rodrigues, Leandro Firmino, Phellipe Haagensen', 6, 'cidade_de_deus.png'),
+('Central do Brasil', 1998, 'Walter Salles', 'Uma ex-professora ajuda um menino a encontrar seu pai pelo Nordeste brasileiro, em uma jornada de transformação pessoal.', 'Fernanda Montenegro, Vinícius de Oliveira, Marília Pêra', 6, 'central_do_brasil.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Harry Potter e a Pedra Filosofal', 2001, 'Chris Columbus', 'Harry Potter é um garoto órfão que descobre ser bruxo e embarca para Hogwarts, onde enfrenta seu primeiro grande desafio.', 'Daniel Radcliffe, Emma Watson, Rupert Grint', 7, 'harry_potter_1.png'),
+('O Senhor dos Anéis: A Sociedade do Anel', 2001, 'Peter Jackson', 'Um hobbit recebe a missão de guardar um anel poderoso e deve destruí-lo antes que caia nas mãos do mal.', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 7, 'senhor_dos_aneis.png'),
+('Alice no País das Maravilhas', 2010, 'Tim Burton', 'Alice retorna ao País das Maravilhas anos depois, onde deve enfrentar a Rainha de Copas e cumprir seu destino.', 'Mia Wasikowska, Johnny Depp, Helena Bonham Carter', 7, 'alice_no_pais.png'),
+('O Labirinto do Fauno', 2006, 'Guillermo del Toro', 'Na Espanha pós-guerra, uma menina descobre um labirinto mágico onde encontra criaturas fantásticas e missões perigosas.', 'Ivana Baquero, Sergi López, Maribel Verdú', 7, 'labirinto_do_fauno.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('Matrix', 1999, 'Lana e Lilly Wachowski', 'Um hacker descobre que a realidade é uma simulação e se junta a um grupo de rebeldes para lutar contra as máquinas.', 'Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss', 8, 'matrix.png'),
+('Blade Runner 2049', 2017, 'Denis Villeneuve', 'Um caçador de replicantes descobre um segredo enterrado há muito tempo que ameaça o que resta da sociedade.', 'Ryan Gosling, Harrison Ford, Ana de Armas', 8, 'blade_runner.png'),
+('Distrito 9', 2009, 'Neill Blomkamp', 'Um alienígena e um humano formam uma aliança improvável quando o governo tenta realocar aliens para um campo de concentração.', 'Sharlto Copley, Jason Cope, David James', 8, 'distrito_9.png'),
+('A Chegada', 2016, 'Denis Villeneuve', 'Uma linguista é recrutada pelo governo para se comunicar com aliens que chegaram à Terra, enquanto o mundo está à beira da guerra.', 'Amy Adams, Jeremy Renner, Forest Whitaker', 8, 'a_chegada.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('A Culpa é das Estrelas', 2014, 'Josh Boone', 'Dois adolescentes com câncer se conhecem em um grupo de apoio e embarcam em uma jornada de amor e descobertas.', 'Shailene Woodley, Ansel Elgort, Nat Wolff', 9, 'culpa_das_estrelas.png'),
+('Simplesmente Acontece', 2014, 'Christian Ditter', 'Alex e Rosie são melhores amigos desde a infância, mas o destino continua a separá-los enquanto buscam a felicidade.', 'Lily Collins, Sam Claflin, Jaime Winstone', 9, 'simplesmente_acontece.png'),
+('Como Eu Era Antes de Você', 2016, 'Thea Sharrock', 'Uma jovem excêntrica se torna cuidadora de um homem rico que ficou paralisado, e os dois desenvolvem uma conexão profunda.', 'Emilia Clarke, Sam Claflin, Janet McTeer', 9, 'como_era_antes_de_voce.png'),
+('La La Land', 2016, 'Damien Chazelle', 'Um músico de jazz e uma atriz aspirante se apaixonam em Los Angeles enquanto perseguem seus sonhos na cidade das estrelas.', 'Ryan Gosling, Emma Stone, John Legend', 9, 'la_la_land.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('O Silêncio dos Inocentes', 1991, 'Jonathan Demme', 'Uma agente do FBI busca a ajuda de um psiquiatra canibal para capturar um serial killer que arranca a pele de suas vítimas.', 'Jodie Foster, Anthony Hopkins, Scott Glenn', 10, 'silencio_dos_inocentes.png'),
+('Corra!', 2017, 'Jordan Peele', 'Um jovem afro-americano visita a família de sua namorada branca e descobre segredos perturbadores sobre a família.', 'Daniel Kaluuya, Allison Williams, Bradley Whitford', 10, 'corra.png'),
+('Os Suspeitos', 1995, 'Bryan Singer', 'A única testemunha sobrevivente de um assalto conta a história de como cinco criminosos planejaram o crime perfeito.', 'Kevin Spacey, Gabriel Byrne, Chazz Palminteri', 10, 'os_suspeitos.png'),
+('Zona de Risco', 2024, 'Alexandre Moratto', 'Um motorista de aplicativo aceita uma corrida noturna e se vê envolvido em um jogo mortal com uma criminosa perigosa.', 'Daniel de Oliveira, Maeve Jinkings', 10, 'zona_de_risco.png');
+
+INSERT INTO tca_filme (titulo, ano_publicacao, diretor, sinopse, elenco, categoria_fk, capa) VALUES
+('It: A Coisa', 2017, 'Andy Muschietti', 'Um grupo de crianças enfrenta um palhaço maligno que se alimenta de seus medos e assume várias formas aterrorizantes.', 'Bill Skarsgård, Jaeden Martell, Sophia Lillis', 11, 'it_a_coisa.png'),
+('O Iluminado', 1980, 'Stanley Kubrick', 'Uma família se muda para um hotel isolado durante o inverno, onde o pai gradualmente enlouquece sob influências sobrenaturais.', 'Jack Nicholson, Shelley Duvall, Danny Lloyd', 11, 'o_iluminado.png'),
+('Hereditário', 2018, 'Ari Aster', 'Uma família é assombrada por uma presença sombria após a morte da avó, revelando segredos ancestrais aterrorizantes.', 'Toni Collette, Alex Wolff, Milly Shapiro', 11, 'hereditario.png'),
+('O Exorcista', 1973, 'William Friedkin', 'Uma atriz recorre a dois padres para salvar sua filha, que está possuída por uma entidade demoníaca.', 'Ellen Burstyn, Max von Sydow, Linda Blair', 11, 'o_exorcista.png');
